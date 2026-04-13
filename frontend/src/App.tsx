@@ -470,23 +470,34 @@ function ChatWidget({ apiKey, tenantName, assistant, color, emoji, msgs, onClose
     recommendation: '💡 Recomendação', scheduling: '📅 Agendamento', handoff: '🤝 Transferência',
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }}
       transition={{ type: 'spring', damping: 30, stiffness: 280 }}
-      style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 50, display: 'flex', gap: 16, alignItems: 'flex-end' }}>
+      style={{
+        position: 'fixed', zIndex: 50,
+        ...(isMobile
+          ? { inset: 0, display: 'flex', flexDirection: 'column' as const }
+          : { bottom: 24, right: 24, display: 'flex', gap: 16, alignItems: 'flex-end' }),
+      }}>
 
-      {/* Admin Panel */}
-      <AnimatePresence>
-        {showAdmin && <AdminPanel adminData={adminData} color={color} assistant={assistant} />}
-      </AnimatePresence>
+      {/* Admin Panel - hidden on mobile */}
+      {!isMobile && (
+        <AnimatePresence>
+          {showAdmin && <AdminPanel adminData={adminData} color={color} assistant={assistant} />}
+        </AnimatePresence>
+      )}
 
       {/* Chat */}
       <div style={{
-        width: 420, height: 640,
+        ...(isMobile
+          ? { width: '100%', height: '100%', borderRadius: 0 }
+          : { width: 420, height: 640, borderRadius: 28 }),
         display: 'flex', flexDirection: 'column' as const, overflow: 'hidden',
-        background: '#0A0C18', borderRadius: 28,
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: `0 0 100px ${color}12, 0 40px 80px rgba(0,0,0,0.6)`,
+        background: '#0A0C18',
+        border: isMobile ? 'none' : '1px solid rgba(255,255,255,0.08)',
+        boxShadow: isMobile ? 'none' : `0 0 100px ${color}12, 0 40px 80px rgba(0,0,0,0.6)`,
       }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>

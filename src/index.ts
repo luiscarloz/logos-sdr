@@ -23,7 +23,12 @@ async function main() {
 
   const app = Fastify({ logger: false });
 
-  await app.register(cors, { origin: true });
+  await app.register(cors, {
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'X-API-Key', 'Authorization'],
+    credentials: true,
+  });
 
   app.setErrorHandler(createErrorHandler(logger));
 
