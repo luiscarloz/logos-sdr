@@ -66,7 +66,8 @@ export function useChat({ apiKey, phone, name }: UseChatOptions) {
     setIsLoading(true);
 
     try {
-      const response = await fetchWithRetry('/api/v1/chat', {
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const response = await fetchWithRetry(`${apiBase}/api/v1/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
         body: JSON.stringify({ phone: phoneRef.current, name: name ?? 'Visitante', content }),
