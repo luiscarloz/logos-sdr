@@ -59,8 +59,12 @@ async function main() {
   // WhatsApp webhooks (no tenant auth - resolved from channel config)
   await app.register(whatsappWebhookRoutes);
 
-  await app.listen({ port: env.PORT, host: env.HOST });
-  logger.info({ port: env.PORT, host: env.HOST }, 'SDR server started');
+  const port = Number(process.env.PORT) || env.PORT;
+  const host = env.HOST;
+  console.log(`Starting server on ${host}:${port} (env.PORT=${env.PORT}, process.env.PORT=${process.env.PORT})`);
+  await app.listen({ port, host });
+  console.log(`SDR server started on ${host}:${port}`);
+  logger.info({ port, host }, 'SDR server started');
 }
 
 main().catch((err) => {
