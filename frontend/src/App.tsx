@@ -272,7 +272,7 @@ function HowItWorks() {
 /* ═══════════════════════════════════════════════════
    ADMIN PANEL
    ═══════════════════════════════════════════════════ */
-function AdminPanel({ adminData, color, assistant }: { adminData: import('./hooks/useChat').LeadAdminData; color: string; assistant: string }) {
+function AdminPanel({ adminData, color, assistant, isMobilePopup }: { adminData: import('./hooks/useChat').LeadAdminData; color: string; assistant: string; isMobilePopup?: boolean }) {
   const scoreColors = { cold: '#3B82F6', warm: '#F59E0B', hot: '#EF4444' };
   const scoreLabels = { cold: '❄️ Frio', warm: '🔥 Morno', hot: '🔥🔥 Quente' };
   const stepIcons: Record<string, string> = {
@@ -287,22 +287,20 @@ function AdminPanel({ adminData, color, assistant }: { adminData: import('./hook
   const showBriefing = adminData.step === 'handoff' || adminData.score >= 60 || hasAppointment || wasCancelled;
 
   return (
-    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }}
+    <motion.div initial={{ opacity: 0, x: isMobilePopup ? 0 : 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: isMobilePopup ? 0 : 30 }}
       transition={{ type: 'spring', damping: 28, stiffness: 250 }}
       style={{
-        width: 360, height: 640, overflowY: 'auto' as const,
-        background: '#0A0C18', borderRadius: 28,
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 40px 80px rgba(0,0,0,0.5)',
-        padding: 0,
+        ...(isMobilePopup
+          ? { width: '100%', overflowY: 'auto' as const, padding: 0 }
+          : { width: 360, height: 640, overflowY: 'auto' as const, background: '#0A0C18', borderRadius: 28, border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 40px 80px rgba(0,0,0,0.5)', padding: 0 }),
       }}>
 
-      {/* Header */}
-      <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* Header - only on desktop */}
+      {!isMobilePopup && <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <BarChart3 size={18} color={color} />
         <span style={{ fontSize: 15, fontWeight: 700, color: T.white }}>Painel Admin</span>
         <span style={{ fontSize: 11, color: T.dim, marginLeft: 'auto' }}>tempo: {elapsed}s</span>
-      </div>
+      </div>}
 
       <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column' as const, gap: 20 }}>
 
@@ -471,6 +469,7 @@ function ChatWidget({ apiKey, tenantName, assistant, color, emoji, msgs, onClose
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [mobileAdmin, setMobileAdmin] = useState(false);
 
   return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }}
@@ -482,12 +481,38 @@ function ChatWidget({ apiKey, tenantName, assistant, color, emoji, msgs, onClose
           : { bottom: 24, right: 24, display: 'flex', gap: 16, alignItems: 'flex-end' }),
       }}>
 
-      {/* Admin Panel - hidden on mobile */}
+      {/* Admin Panel - desktop: side panel */}
       {!isMobile && (
         <AnimatePresence>
           {showAdmin && <AdminPanel adminData={adminData} color={color} assistant={assistant} />}
         </AnimatePresence>
       )}
+
+      {/* Admin Panel - mobile: fullscreen popup */}
+      <AnimatePresence>
+        {isMobile && mobileAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 280 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 60,
+              background: '#0A0C18', overflowY: 'auto' as const,
+            }}>
+            {/* Close bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', position: 'sticky' as const, top: 0, background: '#0A0C18', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <BarChart3 size={16} color={color} />
+                <span style={{ fontSize: 15, fontWeight: 700, color: T.white }}>Painel Admin</span>
+              </div>
+              <button onClick={() => setMobileAdmin(false)}
+                style={{ padding: '8px 16px', borderRadius: 12, background: `${color}15`, border: 'none', color, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                Voltar ao chat
+              </button>
+            </div>
+            <AdminPanel adminData={adminData} color={color} assistant={assistant} isMobilePopup />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat */}
       <div style={{
@@ -510,8 +535,8 @@ function ChatWidget({ apiKey, tenantName, assistant, color, emoji, msgs, onClose
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 11, padding: '5px 12px', borderRadius: 20, fontWeight: 600, background: `${color}12`, color }}>{stepLabel[currentStep] ?? currentStep}</span>
-            <button onClick={() => setShowAdmin(v => !v)} title="Painel Admin"
-              style={{ padding: 8, borderRadius: 12, background: showAdmin ? `${color}18` : 'transparent', border: 'none', color: showAdmin ? color : T.dim, cursor: 'pointer', transition: 'all 0.2s' }}>
+            <button onClick={() => isMobile ? setMobileAdmin(v => !v) : setShowAdmin(v => !v)} title="Painel Admin"
+              style={{ padding: 8, borderRadius: 12, background: (showAdmin || mobileAdmin) ? `${color}18` : 'transparent', border: 'none', color: (showAdmin || mobileAdmin) ? color : T.dim, cursor: 'pointer', transition: 'all 0.2s' }}>
               <BarChart3 size={15} />
             </button>
             <button onClick={reset} style={{ padding: 8, borderRadius: 12, background: 'transparent', border: 'none', color: T.dim, cursor: 'pointer' }}><RotateCcw size={14} /></button>
@@ -705,7 +730,7 @@ function Footer() {
             Pronto para automatizar<br /><span className="text-gradient">suas vendas?</span>
           </h2>
           <p style={{ fontSize: 17, color: T.muted, marginBottom: 48, fontWeight: 400 }}>Configure seu SDR em minutos. Funciona com qualquer indústria.</p>
-          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="btn-brand" style={{ fontSize: 16, padding: '18px 40px', borderRadius: 18 }}>
+          <a href="https://wa.me/5561984188926" target="_blank" rel="noopener noreferrer" className="btn-brand" style={{ fontSize: 16, padding: '18px 40px', borderRadius: 18 }}>
             Falar com a equipe <ChevronRight size={17} />
           </a>
         </Reveal>
