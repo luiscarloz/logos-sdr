@@ -601,7 +601,7 @@ function ChatWidget({ apiKey, tenantName, assistant, color, emoji, msgs, onClose
             <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && fire()} placeholder="Digite sua mensagem..." disabled={isLoading}
               style={{
-                flex: 1, padding: '14px 20px', fontSize: 14, borderRadius: 18, outline: 'none',
+                flex: 1, padding: '14px 20px', fontSize: 16, borderRadius: 18, outline: 'none',
                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
                 color: T.white, opacity: isLoading ? 0.4 : 1,
               }} />
