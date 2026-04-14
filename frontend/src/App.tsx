@@ -403,40 +403,66 @@ function AdminPanel({ adminData, color, assistant, isMobilePopup }: { adminData:
         {showBriefing && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             style={{ ...cardStyle, padding: '20px 24px', borderRadius: 20, borderColor: '#EC489930' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#EC4899', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: 14 }}>🤝 Briefing para o Time</div>
-            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 22 }}>{scoreLabels[adminData.scoreLabel].split(' ')[0]}</span>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#EC4899', letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: 14 }}>🤝 Resumo Executivo</div>
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 14 }}>
+              {/* Score badge */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: 'white', background: scoreColors[adminData.scoreLabel] }}>
+                  {adminData.score}
+                </div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: scoreColors[adminData.scoreLabel] }}>Lead {scoreLabels[adminData.scoreLabel].replace(/🔥|❄️ /g, '').trim()}</div>
-                  <div style={{ fontSize: 11, color: T.dim }}>Score {adminData.score}/100 • {adminData.messageCount} msgs • {elapsed}s</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: T.white }}>Lead {scoreLabels[adminData.scoreLabel].replace(/🔥|❄️ /g, '').trim()}</div>
+                  <div style={{ fontSize: 11, color: T.dim }}>{adminData.messageCount} mensagens em {elapsed}s</div>
                 </div>
               </div>
-              {profileEntries.length > 0 && (
-                <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '12px 16px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: T.dim, marginBottom: 8 }}>DADOS COLETADOS</div>
-                  {profileEntries.map(([k, v]) => (
-                    <div key={k} style={{ fontSize: 12, color: T.gray, lineHeight: 1.8 }}>
-                      <span style={{ color: T.muted }}>{k.replace(/_/g, ' ')}:</span>{' '}
-                      <span style={{ fontWeight: 600, color: T.white }}>{String(v)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+
+              {/* Narrative briefing */}
+              <p style={{ fontSize: 13, color: T.gray, lineHeight: 1.75, margin: 0 }}>
+                {(() => {
+                  const p = adminData.profile;
+                  const parts: string[] = [];
+
+                  // Build narrative from profile
+                  if (p['área']) parts.push(`Precisa de atendimento em ${p['área']}.`);
+                  if (p['tipo'] || p['curso']) parts.push(`Interesse em ${p['tipo'] || p['curso']}.`);
+                  if (p['objetivo']) parts.push(`Objetivo: ${p['objetivo']}.`);
+                  if (p['orçamento'] || p['preco_mencionado']) parts.push(`Orçamento: ${p['orçamento'] || p['preco_mencionado']}.`);
+                  if (p['nível']) parts.push(`Nível atual: ${p['nível']}.`);
+                  if (p['modalidade']) parts.push(`Prefere ${p['modalidade']}.`);
+                  if (p['formato']) parts.push(`Formato: ${p['formato']}.`);
+                  if (p['frequência']) parts.push(`Frequência: ${p['frequência']}.`);
+                  if (p['quartos']) parts.push(`Busca ${p['quartos']}.`);
+                  if (p['bairro'] || p['região']) parts.push(`Região: ${p['bairro'] || p['região']}.`);
+                  if (p['finalidade']) parts.push(`Finalidade: ${p['finalidade']}.`);
+                  if (p['urgência']) parts.push(`Urgência ${String(p['urgência']).toLowerCase()}.`);
+                  if (p['prazo']) parts.push(`Prazo: ${p['prazo']}.`);
+
+                  if (parts.length === 0) parts.push('Lead em fase inicial de qualificação.');
+
+                  return parts.join(' ');
+                })()}
+              </p>
+
+              {/* Appointment status */}
               {hasAppointment && adminData.appointment && (
-                <div style={{ fontSize: 12, color: '#10B981', fontWeight: 600 }}>
-                  ✅ {adminData.appointment.type} agendada: {adminData.appointment.date} às {adminData.appointment.time}
+                <div style={{ fontSize: 13, color: '#10B981', fontWeight: 600, background: 'rgba(16,185,129,0.08)', padding: '10px 14px', borderRadius: 12 }}>
+                  Agendado: {adminData.appointment.type} — {adminData.appointment.date} as {adminData.appointment.time} com {assistant}
                 </div>
               )}
+
               {wasCancelled && !hasAppointment && (
-                <div style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, background: 'rgba(239,68,68,0.08)', padding: '8px 12px', borderRadius: 10 }}>
-                  ❌ Lead cancelou o agendamento. Requer follow-up ou nutrição.
+                <div style={{ fontSize: 13, color: '#EF4444', fontWeight: 600, background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: 12 }}>
+                  Lead cancelou. Mover para nutrição ou follow-up futuro.
                 </div>
               )}
-              <div style={{ fontSize: 12, color: T.muted, fontStyle: 'italic' as const }}>
+
+              {/* Action */}
+              <div style={{ fontSize: 12, color: T.muted, borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 12 }}>
                 {wasCancelled
-                  ? 'Lead desistiu. Mover para nutrição ou follow-up futuro.'
-                  : `Lead pronto para atendimento humano. Transferir para ${assistant}.`}
+                  ? 'Ação: agendar follow-up em 7 dias.'
+                  : hasAppointment
+                    ? `Ação: ${assistant} confirmar presença e preparar atendimento.`
+                    : `Ação: transferir para ${assistant} dar continuidade.`}
               </div>
             </div>
           </motion.div>
