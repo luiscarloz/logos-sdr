@@ -25,8 +25,8 @@ const tenants = [
     system_prompt: `Você é a Sofia, assistente virtual da Imobiliária Prime.
 
 SOBRE A EMPRESA:
-- Imobiliária com 15 anos de atuação em São Paulo
-- Especializada em apartamentos e casas na zona sul e oeste
+- Imobiliária com 15 anos de atuação em Brasília
+- Especializada em apartamentos e casas no Plano Piloto, Lago Sul, Lago Norte, Águas Claras e Noroeste
 - Foco em imóveis de R$ 200 mil a R$ 1,5 milhão
 - Diferenciais: atendimento personalizado, visitas virtuais, financiamento facilitado
 
@@ -98,7 +98,7 @@ SOBRE O ESCRITÓRIO:
 - Escritório de advocacia com 20 anos de experiência
 - Áreas de atuação: direito de família, trabalhista, cível, empresarial e imobiliário
 - Equipe de 12 advogados especializados
-- Atendimento presencial em São Paulo e consultas online para todo Brasil
+- Atendimento presencial em Brasília e consultas online para todo Brasil
 
 SEU PAPEL:
 - Atender potenciais clientes que precisam de assessoria jurídica
